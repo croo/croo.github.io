@@ -1,0 +1,19 @@
+	/**
+	 * Converts input UTC string to local datetime
+	 */
+	public Date fromUtcToLocalDate(final String time, ValidationContext vc) {
+		if (time == null) {
+			return null;
+		}
+		try {
+			//example date that needs this regex fix: 2014-09-21 00:00:58.667693
+			final String timeWithAtMostThreeDigitMilliseconds = time.replaceAll("([.]\\d{3}).*$", "$1");
+
+			DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS").withZoneUTC();
+			DateTime dt = formatter.parseDateTime(timeWithAtMostThreeDigitMilliseconds);
+			return dt.toDateTime(DateTimeZone.forTimeZone(TimeZone.getTimeZone("Europe/Budapest"))).toDate();
+		} catch (final Exception e) {
+			vc.add(new ValidationMessage("Error while parsing date string to Date (expected format: \"yyyy-MM-dd HH:mm:ss.SSS\"). Received input: " + time, e));
+			return null;
+		}
+	}
